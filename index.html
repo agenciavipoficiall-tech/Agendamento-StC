@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAISON — Plataforma Digital</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — DOIS UNIVERSOS
+   Cliente: editorial, serif, espaço, emoção
+   Admin: denso, sans, controle, produtividade
+   ============================================================ */
+:root{
+  --bg:#0a0a0a; --bg-2:#111; --bg-3:#161616;
+  --ink:#f4f1ea; --ink-2:#c9c4b8; --ink-3:#8a8578;
+  --line:rgba(244,241,234,.12); --line-2:rgba(244,241,234,.06);
+  --accent:#c9a961; --accent-2:#8a7444;
+  --danger:#c25a4a; --ok:#7a9b6e; --warn:#c9954a;
+  --serif:'Cormorant Garamond','Playfair Display',Georgia,serif;
+  --sans:'Inter',-apple-system,'Segoe UI',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --r:2px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit;font-size:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+::selection{background:var(--accent);color:var(--bg)}
+
+/* ============ SHELL ============ */
+#shell{min-height:100vh;display:flex;flex-direction:column}
+.view{display:none;min-height:100vh;flex-direction:column}
+.view.active{display:flex}
+
+/* ============ CLIENT APP — ESTÉTICA EDITORIAL ============ */
+.app{background:var(--bg);color:var(--ink)}
+.app-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 32px;mix-blend-mode:difference;
+  transition:transform .4s ease, background .3s;
+}
+.app-nav.scrolled{background:rgba(10,10,10,.85);backdrop-filter:blur(20px);mix-blend-mode:normal}
+.app-nav .brand{font-family:var(--serif);font-size:22px;letter-spacing:.35em;text-transform:uppercase}
+.app-nav .menu{display:flex;gap:28px;font-size:11px;letter-spacing:.28em;text-transform:uppercase}
+.app-nav .menu a{opacity:.75;transition:opacity .2s}
+.app-nav .menu a:hover{opacity:1}
+.app-nav .actions{display:flex;gap:16px;align-items:center}
+.btn-mini{
+  font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  padding:10px 18px;border:1px solid var(--line);border-radius:999px;
+  transition:all .3s;
+}
+.btn-mini:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+@media(max-width:820px){.app-nav .menu{display:none}.app-nav{padding:16px 20px}}
+
+/* HERO */
+.hero{
+  position:relative;height:100vh;min-height:640px;
+  display:flex;align-items:center;padding:0 8vw;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;z-index:0;
+  background-size:cover;background-position:center;
+  transform:scale(1.05);filter:brightness(.55) saturate(.9);
+  transition:transform 1.5s cubic-bezier(.2,.7,.2,1);
+}
+.hero.loaded .hero-bg{transform:scale(1)}
+.hero::after{
+  content:'';position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to right, rgba(10,10,10,.85) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,.75) 100%);
+}
+.hero-inner{position:relative;z-index:2;max-width:720px}
+.hero-eyebrow{
+  font-size:11px;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:28px;
+  opacity:0;transform:translateY(20px);animation:rise .9s .3s forwards;
+}
+.hero h1{
+  font-family:var(--serif);font-weight:300;
+  font-size:clamp(46px,7vw,110px);line-height:.95;letter-spacing:-.02em;
+  margin-bottom:32px;
+  opacity:0;transform:translateY(30px);animation:rise 1s .5s forwards;
+}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero p{
+  font-size:16px;color:var(--ink-2);max-width:480px;line-height:1.7;
+  margin-bottom:44px;
+  opacity:0;transform:translateY(20px);animation:rise .9s .7s forwards;
+}
+.hero-cta{
+  display:inline-flex;align-items:center;gap:14px;
+  font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+  padding:20px 40px;background:var(--accent);color:var(--bg);
+  border-radius:999px;font-weight:500;
+  transition:all .35s;cursor:pointer;border:none;
+  opacity:0;transform:translateY(20px);animation:rise .9s .9s forwards;
+}
+.hero-cta:hover{background:var(--ink);transform:translateY(-2px)}
+.hero-cta svg{transition:transform .3s}
+.hero-cta:hover svg{transform:translateX(4px)}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+.scroll-hint{
+  position:absolute;bottom:32px;left:8vw;z-index:3;
+  font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:var(--ink-3);
+  display:flex;align-items:center;gap:12px;
+  opacity:0;animation:rise 1s 1.2s forwards;
+}
+.scroll-hint::before{
+  content:'';width:40px;height:1px;background:var(--accent);
+}
+
+/* SEÇÃO MANIFESTO */
+.manifesto{padding:140px 8vw;display:grid;grid-template-columns:1fr 1.4fr;gap:80px;align-items:center}
+.manifesto-num{font-family:var(--serif);font-size:80px;color:var(--accent);line-height:1;font-style:italic;opacity:.6}
+.manifesto-body h2{
+  font-family:var(--serif);font-weight:300;
+  font-size:clamp(32px,4vw,56px);line-height:1.15;margin-bottom:28px;
+  letter-spacing:-.01em;
+}
+.manifesto-body p{color:var(--ink-2);font-size:15px;line-height:1.85;max-width:520px}
+@media(max-width:820px){.manifesto{grid-template-columns:1fr;gap:32px;padding:80px 6vw}}
+
+/* EXPERIÊNCIAS — SEM CARDS REPETITIVOS */
+.exp-header{padding:0 8vw 60px;display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap}
+.exp-header h2{font-family:var(--serif);font-weight:300;font-size:clamp(40px,5vw,72px);line-height:1;letter-spacing:-.02em}
+.exp-header h2 em{font-style:italic;color:var(--accent)}
+.exp-header .count{font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:.1em}
+.exp-list{padding:0 8vw 140px}
+.exp-row{
+  display:grid;grid-template-columns:80px 1fr 200px 160px 60px;
+  gap:32px;align-items:center;
+  padding:38px 0;border-top:1px solid var(--line);
+  cursor:pointer;transition:padding .35s, background .35s;
+  position:relative;
+}
+.exp-row:last-child{border-bottom:1px solid var(--line)}
+.exp-row:hover{padding-left:20px;padding-right:20px;background:linear-gradient(90deg,transparent,rgba(201,169,97,.06),transparent)}
+.exp-num{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.15em}
+.exp-name{font-family:var(--serif);font-size:clamp(24px,2.4vw,38px);font-weight:300;letter-spacing:-.01em;transition:color .3s}
+.exp-row:hover .exp-name{color:var(--accent)}
+.exp-cat{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-3)}
+.exp-dur{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.exp-price{font-family:var(--serif);font-size:26px;text-align:right;letter-spacing:-.01em}
+.exp-arrow{width:44px;height:44px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.exp-row:hover .exp-arrow{background:var(--accent);color:var(--bg);border-color:var(--accent);transform:rotate(-45deg)}
+@media(max-width:820px){
+  .exp-row{grid-template-columns:50px 1fr 60px;gap:16px;padding:24px 0}
+  .exp-cat,.exp-dur,.exp-price{display:none}
+}
+
+/* PROFISSIONAIS */
+.profs{padding:120px 8vw;background:var(--bg-2);border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+.profs h2{font-family:var(--serif);font-weight:300;font-size:clamp(36px,4.5vw,64px);margin-bottom:80px;letter-spacing:-.02em}
+.profs h2 em{font-style:italic;color:var(--accent)}
+.profs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:40px}
+.prof{position:relative}
+.prof-img{aspect-ratio:3/4;background:var(--bg-3);overflow:hidden;position:relative;margin-bottom:20px}
+.prof-img img{width:100%;height:100%;object-fit:cover;filter:grayscale(.4) brightness(.85);transition:filter .6s,transform .6s}
+.prof:hover .prof-img img{filter:grayscale(0) brightness(1);transform:scale(1.04)}
+.prof-name{font-family:var(--serif);font-size:24px;font-weight:300;margin-bottom:6px}
+.prof-role{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-3)}
+
+/* CTA FINAL */
+.cta-final{padding:180px 8vw;text-align:center;position:relative;overflow:hidden}
+.cta-final h2{font-family:var(--serif);font-weight:300;font-size:clamp(44px,6vw,90px);line-height:1;letter-spacing:-.02em;margin-bottom:40px}
+.cta-final h2 em{font-style:italic;color:var(--accent)}
+.cta-final p{color:var(--ink-2);max-width:520px;margin:0 auto 48px;line-height:1.8}
+
+/* FOOTER */
+.app-footer{padding:60px 8vw;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);flex-wrap:wrap;gap:20px}
+
+/* ============ BOOKING DRAWER ============ */
+.drawer{
+  position:fixed;inset:0;z-index:200;display:none;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(10px);
+}
+.drawer.open{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.drawer-panel{
+  position:absolute;top:0;right:0;bottom:0;width:min(560px,100%);
+  background:var(--bg-2);border-left:1px solid var(--line);
+  overflow-y:auto;padding:60px 48px;
+  animation:slideIn .5s cubic-bezier(.2,.7,.2,1);
+}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.drawer-close{position:absolute;top:24px;right:24px;width:44px;height:44px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.drawer-close:hover{background:var(--accent);color:var(--bg);transform:rotate(90deg)}
+.drawer h3{font-family:var(--serif);font-weight:300;font-size:38px;line-height:1.1;margin-bottom:8px}
+.drawer .sub{color:var(--ink-3);font-size:13px;letter-spacing:.1em;margin-bottom:40px}
+.field{margin-bottom:24px}
+.field label{display:block;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.field input,.field select,.field textarea{
+  width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--line);
+  border-radius:var(--r);font-size:15px;transition:border .2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
+.slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.slot{padding:14px 4px;text-align:center;border:1px solid var(--line);font-family:var(--mono);font-size:12px;transition:all .2s;border-radius:var(--r)}
+.slot:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.slot.selected{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.slot:disabled{opacity:.25;cursor:not-allowed;text-decoration:line-through}
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pay-method{padding:18px 16px;border:1px solid var(--line);border-radius:var(--r);text-align:left;transition:all .2s;position:relative}
+.pay-method:hover{border-color:var(--ink-3)}
+.pay-method.selected{border-color:var(--accent);background:rgba(201,169,97,.08)}
+.pay-method strong{display:block;font-family:var(--serif);font-size:18px;font-weight:400;margin-bottom:4px}
+.pay-method span{font-size:11px;color:var(--ink-3);letter-spacing:.1em}
+.summary{background:var(--bg);border:1px solid var(--line);padding:24px;border-radius:var(--r);margin:32px 0}
+.summary-row{display:flex;justify-content:space-between;padding:10px 0;font-size:13px;border-bottom:1px solid var(--line-2)}
+.summary-row:last-child{border-bottom:none;padding-top:18px;margin-top:10px;border-top:1px solid var(--line);font-family:var(--serif);font-size:22px}
+.summary-row span:first-child{color:var(--ink-3)}
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px 24px;border-radius:var(--r);
+  font-size:11px;letter-spacing:.3em;text-transform:uppercase;font-weight:500;
+  transition:all .3s;
+}
+.btn-primary{background:var(--accent);color:var(--bg)}
+.btn-primary:hover{background:var(--ink)}
+.btn-primary:disabled{opacity:.3;cursor:not-allowed}
+.btn-ghost{border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.qr-box{background:#fff;padding:20px;border-radius:var(--r);margin:20px auto;width:fit-content}
+.qr-box img{display:block}
+.copy-paste{
+  background:var(--bg);border:1px dashed var(--line);padding:14px;
+  border-radius:var(--r);font-family:var(--mono);font-size:11px;
+  word-break:break-all;margin:16px 0;color:var(--ink-2);
+  max-height:80px;overflow-y:auto;
+}
+.status-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;background:rgba(201,169,97,.12);color:var(--accent)}
+.status-pill::before{content:'';width:6px;height:6px;border-radius:999px;background:currentColor;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ============ ADMIN ============ */
+.admin{background:#0d0d0f;font-size:13px}
+.admin-login{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 30% 20%,rgba(201,169,97,.08),transparent 50%),#0d0d0f;
+  padding:40px;
+}
+.login-card{width:100%;max-width:400px;background:#131316;border:1px solid #1e1e24;padding:48px 40px;border-radius:4px}
+.login-card h1{font-family:var(--serif);font-size:32px;font-weight:300;margin-bottom:8px}
+.login-card .sub{color:#6b6b78;font-size:12px;margin-bottom:36px;letter-spacing:.05em}
+.login-card .field input{background:#0a0a0c;border-color:#25252d}
+.login-card .field input:focus{border-color:var(--accent)}
+.login-error{background:rgba(194,90,74,.15);border:1px solid rgba(194,90,74,.3);color:#e88b7c;padding:12px 14px;border-radius:3px;font-size:12px;margin-bottom:20px;display:none}
+.login-error.show{display:block}
+.login-hint{color:#52525e;font-size:11px;text-align:center;margin-top:24px;line-height:1.6}
+
+.admin-shell{display:none;min-height:100vh;grid-template-columns:230px 1fr}
+.admin-shell.active{display:grid}
+.admin-side{background:#131316;border-right:1px solid #1e1e24;padding:24px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.admin-side .logo{padding:0 22px 28px;font-family:var(--serif);font-size:20px;letter-spacing:.3em;border-bottom:1px solid #1e1e24;margin-bottom:16px}
+.admin-side .logo small{display:block;font-family:var(--sans);font-size:9px;letter-spacing:.3em;color:#52525e;margin-top:6px}
+.admin-nav{padding:0 10px;flex:1}
+.admin-nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;border-radius:3px;font-size:12.5px;color:#9494a0;
+  transition:all .15s;width:100%;text-align:left;margin-bottom:2px;
+}
+.admin-nav-item:hover{background:#1a1a20;color:#e4e4ea}
+.admin-nav-item.active{background:rgba(201,169,97,.1);color:var(--accent)}
+.admin-nav-item .dot{width:4px;height:4px;border-radius:999px;background:currentColor;opacity:.5}
+.admin-nav-section{padding:18px 12px 8px;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:#3e3e48}
+.admin-user{padding:16px 22px;border-top:1px solid #1e1e24;font-size:12px;color:#9494a0}
+.admin-user strong{display:block;color:#e4e4ea;font-size:13px;margin-bottom:2px}
+.admin-user .logout{margin-top:12px;font-size:11px;color:#c25a4a;letter-spacing:.05em}
+.admin-user .logout:hover{text-decoration:underline}
+
+.admin-main{padding:32px 40px;overflow-x:hidden}
+.admin-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;gap:20px;flex-wrap:wrap}
+.admin-head h1{font-family:var(--serif);font-size:32px;font-weight:400}
+.admin-head .sub{color:#6b6b78;font-size:12px;margin-top:6px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+.kpi{background:#131316;border:1px solid #1e1e24;padding:22px;border-radius:4px}
+.kpi .label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#52525e;margin-bottom:12px}
+.kpi .value{font-family:var(--serif);font-size:32px;font-weight:400;line-height:1}
+.kpi .delta{font-size:11px;margin-top:10px;color:var(--ok)}
+.kpi .delta.down{color:var(--danger)}
+.panel{background:#131316;border:1px solid #1e1e24;border-radius:4px;padding:24px;margin-bottom:24px}
+.panel h3{font-family:var(--serif);font-size:18px;font-weight:400;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.panel h3 .actions{display:flex;gap:8px;font-family:var(--sans);font-size:11px}
+.btn-sm{padding:8px 14px;border:1px solid #2a2a32;border-radius:3px;font-size:11px;letter-spacing:.08em;transition:all .15s;color:#c9c9d0}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm.primary{background:var(--accent);color:#0a0a0c;border-color:var(--accent)}
+.btn-sm.primary:hover{background:#e0be74;color:#0a0a0c}
+.btn-sm.danger{color:#e88b7c;border-color:rgba(194,90,74,.4)}
+.btn-sm.danger:hover{background:rgba(194,90,74,.1)}
+
+.admin-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.admin-table th{text-align:left;padding:10px 12px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#52525e;font-weight:500;border-bottom:1px solid #1e1e24}
+.admin-table td{padding:14px 12px;border-bottom:1px solid #17171d;color:#c9c9d0}
+.admin-table tr:hover td{background:#15151a}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.tag.ok{background:rgba(122,155,110,.15);color:#9bc48e}
+.tag.warn{background:rgba(201,149,74,.15);color:#e0b56e}
+.tag.danger{background:rgba(194,90,74,.15);color:#e88b7c}
+.tag.info{background:rgba(122,155,200,.15);color:#8fb3e0}
+.tag.gold{background:rgba(201,169,97,.15);color:var(--accent)}
+
+.admin-form{display:grid;gap:16px}
+.admin-form.two{grid-template-columns:1fr 1fr}
+.admin-form .field label{font-size:10px;color:#52525e;letter-spacing:.18em}
+.admin-form .field input,.admin-form .field select,.admin-form .field textarea{background:#0a0a0c;border-color:#25252d;padding:11px 13px;font-size:13px}
+.admin-form .field input:focus{border-color:var(--accent)}
+.admin-form .full{grid-column:1/-1}
+.upload-box{
+  border:1.5px dashed #2a2a32;border-radius:3px;padding:24px;text-align:center;
+  color:#6b6b78;font-size:12px;cursor:pointer;transition:all .2s;
+  background:#0a0a0c;
+}
+.upload-box:hover{border-color:var(--accent);color:var(--accent);background:rgba(201,169,97,.04)}
+.upload-box input{display:none}
+.upload-preview{margin-top:12px;display:flex;gap:12px;align-items:center;background:#0a0a0c;border:1px solid #25252d;padding:10px;border-radius:3px}
+.upload-preview img{width:60px;height:60px;object-fit:cover;border-radius:2px}
+.upload-preview .info{flex:1;font-size:11px;color:#9494a0;word-break:break-all}
+.upload-preview button{color:#e88b7c;font-size:11px}
+.url-row{display:flex;gap:8px;margin-top:8px}
+.url-row input{flex:1}
+.cms-section{border:1px solid #1e1e24;border-radius:3px;padding:14px;margin-bottom:10px;background:#0f0f12;display:flex;align-items:center;gap:14px;cursor:grab}
+.cms-section.dragging{opacity:.4}
+.cms-section .handle{color:#3e3e48;font-family:var(--mono);font-size:16px;cursor:grab}
+.cms-section .name{flex:1;font-size:13px;color:#c9c9d0}
+.cms-section .name small{display:block;color:#52525e;font-size:10.5px;margin-top:2px;letter-spacing:.05em}
+.cms-section .toggles{display:flex;gap:6px;align-items:center}
+.switch{position:relative;width:34px;height:18px;background:#2a2a32;border-radius:999px;transition:background .2s;cursor:pointer;flex-shrink:0}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#6b6b78;border-radius:999px;transition:all .2s}
+.switch.on{background:rgba(201,169,97,.35)}
+.switch.on::after{left:18px;background:var(--accent)}
+.toast{position:fixed;bottom:24px;right:24px;z-index:500;background:#1a1a20;border:1px solid var(--accent);color:var(--ink);padding:14px 20px;border-radius:4px;font-size:12.5px;opacity:0;transform:translateY(20px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.empty{padding:40px;text-align:center;color:#52525e;font-size:12px}
+.seg{display:flex;background:#0a0a0c;border:1px solid #1e1e24;border-radius:3px;padding:3px;gap:2px;font-size:11px;width:fit-content}
+.seg button{padding:6px 14px;border-radius:2px;color:#6b6b78;transition:all .15s}
+.seg button.active{background:#1a1a20;color:#e4e4ea}
+.agenda{display:grid;gap:6px;grid-template-columns:80px 1fr;font-size:12px}
+.agenda .time{color:#52525e;padding-top:10px;font-family:var(--mono);font-size:11px}
+.agenda .evt{background:rgba(201,169,97,.08);border-left:2px solid var(--accent);padding:10px 12px;border-radius:2px}
+.agenda .evt b{color:var(--ink);display:block;font-weight:500;margin-bottom:2px}
+.agenda .evt small{color:#6b6b78;font-size:10.5px}
+
+@media(max-width:900px){
+  .admin-shell{grid-template-columns:1fr}
+  .admin-side{position:relative;height:auto;flex-direction:row;overflow-x:auto;padding:12px;gap:8px;align-items:center}
+  .admin-side .logo{padding:0 12px 0 0;margin:0;border:none}
+  .admin-side .logo small{display:none}
+  .admin-nav{display:flex;gap:4px;padding:0}
+  .admin-nav-section{display:none}
+  .admin-nav-item{white-space:nowrap;padding:8px 12px;margin:0}
+  .admin-user{border:none;padding:8px;margin-left:auto}
+  .admin-user .logout{margin-top:4px}
+  .admin-main{padding:20px}
+  .admin-form.two{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="shell">
+
+<!-- ==================================================
+     VIEW 1: APP DO CLIENTE (estética editorial)
+     ================================================== -->
+<div class="view active app" id="viewClient">
+  <nav class="app-nav" id="appNav">
+    <div class="brand" id="brandLabel">MAISON</div>
+    <div class="menu">
+      <a onclick="scrollTo('#sec-manifesto')">O Salão</a>
+      <a onclick="scrollTo('#sec-exp')">Experiências</a>
+      <a onclick="scrollTo('#sec-profs')">Time</a>
+      <a onclick="scrollTo('#sec-cta')">Contato</a>
+    </div>
+    <div class="actions">
+      <button class="btn-mini" onclick="goAdmin()">Admin</button>
+      <button class="btn-mini" onclick="openBooking(null)">Reservar</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-inner">
+      <div class="hero-eyebrow" id="heroEyebrow">Beleza · Arte · Presença</div>
+      <h1 id="heroTitle">Onde o tempo<br><em>se torna ritual</em></h1>
+      <p id="heroSub">Um espaço desenhado para celebrar a beleza em sua forma mais silenciosa e sofisticada.</p>
+      <button class="hero-cta" onclick="scrollTo('#sec-exp')">
+        Descobrir Experiências
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="scroll-hint">Explore</div>
+  </section>
+
+  <!-- MANIFESTO -->
+  <section class="manifesto" id="sec-manifesto">
+    <div class="manifesto-num">01</div>
+    <div class="manifesto-body">
+      <h2 id="manifestoTitle">A beleza não<br>tem <em>pressa</em>.</h2>
+      <p id="manifestoText">Cada visita é um convite para desacelerar. Nossos rituais são construídos a partir de escuta atenta, técnica apurada e um olhar que reconhece a singularidade de cada pessoa.</p>
+    </div>
+  </section>
+
+  <!-- EXPERIÊNCIAS -->
+  <section id="sec-exp">
+    <div class="exp-header">
+      <h2>Experiências<br><em>assinadas</em></h2>
+      <div class="count" id="expCount">— rituais disponíveis</div>
+    </div>
+    <div class="exp-list" id="expList"></div>
+  </section>
+
+  <!-- PROFISSIONAIS -->
+  <section class="profs" id="sec-profs">
+    <h2>Mãos que<br><em>assinam</em></h2>
+    <div class="profs-grid" id="profsGrid"></div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-final" id="sec-cta">
+    <h2>Reserve seu<br><em>ritual</em></h2>
+    <p>Escolha o dia, o profissional e a experiência. Em poucos segundos, seu momento está garantido.</p>
+    <button class="hero-cta" style="opacity:1;transform:none;animation:none" onclick="openBooking(null)">Começar reserva</button>
+  </section>
+
+  <footer class="app-footer">
+    <div id="footerBrand">© MAISON — Plataforma Digital</div>
+    <div id="footerAddr">—</div>
+  </footer>
+</div>
+
+<!-- ==================================================
+     VIEW 2: LOGIN ADMIN
+     ================================================== -->
+<div class="view admin-login" id="viewLogin">
+  <div class="login-card">
+    <h1>Painel</h1>
+    <div class="sub">Acesso restrito à administração</div>
+    <div class="login-error" id="loginError"></div>
+    <div id="loginFirstAccess" style="display:none">
+      <div class="field"><label>Nome</label><input id="faName" value="Administrador"></div>
+      <div class="field"><label>E-mail</label><input id="faEmail" type="email" value="admin@maison.com"></div>
+      <div class="field"><label>Senha</label><input id="faPass" type="password" placeholder="mínimo 8 caracteres"></div>
+      <button class="btn btn-primary" onclick="firstAccess()">Criar conta admin</button>
+      <div class="login-hint">Primeiro acesso — defina suas credenciais.</div>
+    </div>
+    <div id="loginForm">
+      <div class="field"><label>E-mail</label><input id="loginEmail" type="email" value="admin@maison.com"></div>
+      <div class="field"><label>Senha</label><input id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
+      <div class="login-hint">Sessão protegida · Auditoria ativa</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================
+     VIEW 3: ADMIN SHELL
+     ================================================== -->
+<div class="view admin" id="viewAdmin">
+  <div class="admin-shell" id="adminShell">
+    <aside class="admin-side">
+      <div class="logo">MAISON<small>Plataforma</small></div>
+      <nav class="admin-nav" id="adminNav"></nav>
+      <div class="admin-user">
+        <strong id="adminUserName">—</strong>
+        <div id="adminUserRole">—</div>
+        <button class="logout" onclick="doLogout()">Encerrar sessão</button>
+        <button class="logout" onclick="doLogoutAll()" style="color:#c9954a">Encerrar todas as sessões</button>
+      </div>
+    </aside>
+    <main class="admin-main" id="adminMain"></main>
+  </div>
+</div>
+
+</div>
+
+<!-- BOOKING DRAWER -->
+<div class="drawer" id="bookingDrawer" onclick="if(event.target===this)closeBooking()">
+  <div class="drawer-panel" id="drawerPanel"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   NÚCLEO — Persistência real via IndexedDB + localStorage
+   ============================================================ */
+
+const DB_NAME='maison_v1';
+let _db=null;
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    if(_db)return res(_db);
+    const req=indexedDB.open(DB_NAME,1);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      ['services','professionals','bookings','payments','media','cms','settings','clients','coupons','audit','users','sessions'].forEach(s=>{
+        if(!db.objectStoreNames.contains(s))db.createObjectStore(s,{keyPath:'id'});
+      });
+    };
+    req.onsuccess=e=>{_db=e.target.result;res(_db)};
+    req.onerror=e=>rej(e);
+  });
+}
+
+async function dbGetAll(store){
+  const db=await openDB();
+  return new Promise(res=>{
+    const tx=db.transaction(store,'readonly').objectStore(store).getAll();
+    tx.onsuccess=()=>res(tx.result||[]);
+    tx.onerror=()=>res([]);
+  });
+}
+async function dbGet(store,id){
+  const db=await openDB();
+  return new Promise(res=>{
+    const tx=db.transaction(store,'readonly').objectStore(store).get(id);
+    tx.onsuccess=()=>res(tx.result||null);
+    tx.onerror=()=>res(null);
+  });
+}
+async function dbPut(store,obj){
+  if(!obj.id)obj.id=cuid();
+  const db=await openDB();
+  return new Promise(res=>{
+    const tx=db.transaction(store,'readwrite').objectStore(store).put(obj);
+    tx.onsuccess=()=>res(obj);
+    tx.onerror=e=>{console.error(e);res(null)};
+  });
+}
+async function dbDel(store,id){
+  const db=await openDB();
+  return new Promise(res=>{
+    const tx=db.transaction(store,'readwrite').objectStore(store).delete(id);
+    tx.onsuccess=()=>res(true);
+    tx.onerror=()=>res(false);
+  });
+}
+
+function cuid(){return 'c'+Math.random().toString(36).slice(2,10)+Date.now().toString(36)}
+function fmtBRL(n){return 'R$ '+Number(n||0).toFixed(2).replace('.',',')}
+function fmtDate(iso){if(!iso)return '—';const d=new Date(iso);return d.toLocaleDateString('pt-BR')}
+function fmtDateTime(iso){if(!iso)return '—';const d=new Date(iso);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600)}
+function scrollTo(sel){document.querySelector(sel)?.scrollIntoView({behavior:'smooth'})}
+
+/* ============================================================
+   HASH DE SENHA (WebCrypto PBKDF2)
+   ============================================================ */
+async function hashPassword(pass,saltB64){
+  const enc=new TextEncoder();
+  let salt;
+  if(saltB64){salt=Uint8Array.from(atob(saltB64),c=>c.charCodeAt(0))}
+  else{salt=crypto.getRandomValues(new Uint8Array(16));}
+  const key=await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:120000,hash:'SHA-256'},key,256);
+  return {hash:btoa(String.fromCharCode(...new Uint8Array(bits))),salt:btoa(String.fromCharCode(...salt))};
+}
+async function verifyPassword(pass,hash,salt){
+  const r=await hashPassword(pass,salt);
+  return r.hash===hash;
+}
+
+/* ============================================================
+   SESSÃO ADMIN (localStorage)
+   ============================================================ */
+const SESSION_KEY='maison_session';
+function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{return null}}
+function setSession(s){localStorage.setItem(SESSION_KEY,JSON.stringify(s))}
+function clearSession(){localStorage.removeItem(SESSION_KEY)}
+
+async function isFirstAccess(){
+  const users=await dbGetAll('users');
+  return users.length===0;
+}
+
+async function firstAccess(){
+  const name=document.getElementById('faName').value.trim();
+  const email=document.getElementById('faEmail').value.trim().toLowerCase();
+  const pass=document.getElementById('faPass').value;
+  const err=document.getElementById('loginError');
+  if(!name||!email||pass.length<8){err.textContent='Preencha tudo. Senha com 8+ caracteres.';err.classList.add('show');return}
+  const {hash,salt}=await hashPassword(pass);
+  const user={id:cuid(),name,email,passwordHash:hash,salt,role:'SUPER_ADMIN',createdAt:new Date().toISOString()};
+  await dbPut('users',user);
+  await audit(user.id,'PRIMEIRO_ACESSO','User',user.id,{});
+  toast('Conta admin criada');
+  document.getElementById('loginFirstAccess').style.display='none';
+  document.getElementById('loginForm').style.display='block';
+  document.getElementById('loginEmail').value=email;
+}
+
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass=document.getElementById('loginPass').value;
+  const err=document.getElementById('loginError');
+  err.classList.remove('show');
+  const users=await dbGetAll('users');
+  const user=users.find(u=>u.email===email);
+  if(!user){err.textContent='Credenciais inválidas';err.classList.add('show');return}
+  const ok=await verifyPassword(pass,user.passwordHash,user.salt);
+  if(!ok){err.textContent='Credenciais inválidas';err.classList.add('show');await audit(user.id,'LOGIN_FALHA','User',user.id,{});return}
+  const token=cuid()+cuid();
+  const session={userId:user.id,name:user.name,email:user.email,role:user.role,token,startedAt:new Date().toISOString()};
+  setSession(session);
+  await dbPut('sessions',{id:token,userId:user.id,startedAt:session.startedAt,revoked:false});
+  await audit(user.id,'LOGIN','User',user.id,{});
+  document.getElementById('loginPass').value='';
+  showAdmin();
+}
+
+async function doLogout(){
+  const s=getSession();
+  if(s){await audit(s.userId,'LOGOUT','User',s.userId,{});const ses=await dbGet('sessions',s.token);if(ses){ses.revoked=true;ses.endedAt=new Date().toISOString();await dbPut('sessions',ses)}}
+  clearSession();
+  showLogin();
+}
+async function doLogoutAll(){
+  const s=getSession();if(!s)return;
+  const all=await dbGetAll('sessions');
+  for(const ses of all){
+    if(ses.userId===s.userId&&!ses.revoked){ses.revoked=true;ses.endedAt=new Date().toISOString();await dbPut('sessions',ses)}
+  }
+  await audit(s.userId,'LOGOUT_ALL','User',s.userId,{});
+  clearSession();
+  toast('Todas as sessões encerradas');
+  showLogin();
+}
+
+function showLogin(){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('viewLogin').classList.add('active');
+  isFirstAccess().then(first=>{
+    document.getElementById('loginFirstAccess').style.display=first?'block':'none';
+    document.getElementById('loginForm').style.display=first?'none':'block';
+  });
+}
+function showClient(){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('viewClient').classList.add('active');
+  renderClient();
+}
+function showAdmin(){
+  const s=getSession();
+  if(!s){showLogin();return}
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('viewAdmin').classList.add('active');
+  document.getElementById('adminShell').classList.add('active');
+  document.getElementById('adminUserName').textContent=s.name;
+  document.getElementById('adminUserRole').textContent=s.role;
+  renderAdminNav();
+  adminRoute('dashboard');
+}
+function goAdmin(){
+  const s=getSession();
+  s?showAdmin():showLogin();
+}
+
+/* ============================================================
+   AUDITORIA
+   ============================================================ */
+async function audit(userId,action,resource,resourceId,meta){
+  await dbPut('audit',{id:cuid(),userId,action,resource,resourceId,at:new Date().toISOString(),meta:meta||{}});
+}
+
+/* ============================================================
+   SEED — dados iniciais (só roda uma vez)
+   ============================================================ */
+async function seed(){
+  const settings=await dbGetAll('settings');
+  if(settings.find(s=>s.id==='brand'))return;
+
+  const imgHero='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1600&q=80';
+  const img1='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80';
+  const img2='https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800&q=80';
+  const img3='https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800&q=80';
+  const p1='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80';
+  const p2='https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&q=80';
+  const p3='https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80';
+
+  await dbPut('settings',{id:'brand',
+    salonName:'MAISON',
+    heroEyebrow:'Beleza · Arte · Presença',
+    heroTitle:'Onde o tempo<br><em>se torna ritual</em>',
+    heroSub:'Um espaço desenhado para celebrar a beleza em sua forma mais silenciosa e sofisticada.',
+    heroImage:imgHero,
+    manifestoTitle:'A beleza não<br>tem <em>pressa</em>.',
+    manifestoText:'Cada visita é um convite para desacelerar. Nossos rituais são construídos a partir de escuta atenta, técnica apurada e um olhar que reconhece a singularidade de cada pessoa.',
+    accent:'#c9a961',bg:'#0a0a0a',ink:'#f4f1ea',
+    address:'Rua Oscar Freire, 1200 — Jardins, São Paulo',
+    phone:'+55 11 4000-0000',
+    mpPublicKey:'',mpAccessToken:'',mpEnv:'sandbox',
+    payPix:true,payCredit:true,payDebit:true,payCash:true,
+    holdMinutes:10,
+  });
+
+  const svcs=[
+    {name:'Corte Assinatura',cat:'Cabelo',price:380,dur:60,img:img1,desc:'Corte personalizado com diagnóstico e finalização.'},
+    {name:'Coloração Editorial',cat:'Cor',price:890,dur:180,img:img2,desc:'Colorimetria de autor com acabamento premium.'},
+    {name:'Ritual Facial Noir',cat:'Estética',price:640,dur:90,img:img3,desc:'Limpeza profunda, ativos e massagem facial.'},
+    {name:'Escova Couture',cat:'Finalização',price:220,dur:45,img:img1,desc:'Finalização com produtos de alta performance.'},
+  ];
+  for(const s of svcs){
+    await dbPut('services',{id:cuid(),...s,active:true,createdAt:new Date().toISOString()});
+  }
+  const profs=[
+    {name:'Amanda Reis',role:'Hair Stylist',img:p1,bio:'Especialista em cortes de autor.'},
+    {name:'Juliana Costa',role:'Colorista',img:p2,bio:'Colorimetria editorial e loiros sofisticados.'},
+    {name:'Marina Alves',role:'Esteticista',img:p3,bio:'Rituais faciais e bem-estar.'},
+  ];
+  for(const p of profs){
+    await dbPut('professionals',{id:cuid(),...p,active:true,createdAt:new Date().toISOString()});
+  }
+
+  const cms=[
+    {id:cuid(),key:'hero',label:'Hero',order:0,enabled:true,content:{}},
+    {id:cuid(),key:'manifesto',label:'Manifesto',order:1,enabled:true,content:{}},
+    {id:cuid(),key:'experiences',label:'Experiências',order:2,enabled:true,content:{}},
+    {id:cuid(),key:'professionals',label:'Profissionais',order:3,enabled:true,content:{}},
+    {id:cuid(),key:'cta',label:'CTA Final',order:4,enabled:true,content:{}},
+  ];
+  for(const c of cms)await dbPut('cms',c);
+}
+
+/* ============================================================
+   APP DO CLIENTE — render
+   ============================================================ */
+let APP_SETTINGS=null;
+
+async function renderClient(){
+  APP_SETTINGS=await dbGet('settings','brand');
+  const S=APP_SETTINGS;
+  document.documentElement.style.setProperty('--accent',S.accent||'#c9a961');
+  document.documentElement.style.setProperty('--bg',S.bg||'#0a0a0a');
+  document.documentElement.style.setProperty('--ink',S.ink||'#f4f1ea');
+
+  document.getElementById('brandLabel').textContent=S.salonName||'MAISON';
+  document.getElementById('heroEyebrow').textContent=S.heroEyebrow||'';
+  document.getElementById('heroTitle').innerHTML=S.heroTitle||'';
+  document.getElementById('heroSub').textContent=S.heroSub||'';
+  const hb=document.getElementById('heroBg');
+  hb.style.backgroundImage=`url('${S.heroImage||''}')`;
+  document.getElementById('hero').classList.add('loaded');
+
+  document.getElementById('manifestoTitle').innerHTML=S.manifestoTitle||'';
+  document.getElementById('manifestoText').textContent=S.manifestoText||'';
+  document.getElementById('footerBrand').textContent=`© ${S.salonName} — Plataforma Digital`;
+  document.getElementById('footerAddr').textContent=S.address||'';
+
+  // Serviços
+  const services=(await dbGetAll('services')).filter(s=>s.active).sort((a,b)=>a.name.localeCompare(b.name));
+  document.getElementById('expCount').textContent=`${services.length} rituais disponíveis`;
+  const list=document.getElementById('expList');
+  list.innerHTML='';
+  services.forEach((s,i)=>{
+    const el=document.createElement('div');
+    el.className='exp-row';
+    el.innerHTML=`
+      <div class="exp-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="exp-name">${esc(s.name)}</div>
+      <div class="exp-cat">${esc(s.cat)}</div>
+      <div class="exp-dur">${s.dur} min</div>
+      <div class="exp-price">${fmtBRL(s.price)}</div>
+      <div class="exp-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+    `;
+    el.onclick=()=>openBooking(s.id);
+    list.appendChild(el);
+  });
+  if(!services.length){
+    list.innerHTML='<div class="empty">Nenhuma experiência publicada ainda.</div>';
+  }
+
+  // Profissionais
+  const profs=(await dbGetAll('professionals')).filter(p=>p.active);
+  const pg=document.getElementById('profsGrid');
+  pg.innerHTML='';
+  profs.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='prof';
+    el.innerHTML=`
+      <div class="prof-img"><img src="${esc(p.img||'')}" alt="${esc(p.name)}"></div>
+      <div class="prof-name">${esc(p.name)}</div>
+      <div class="prof-role">${esc(p.role||'')}</div>
+    `;
+    pg.appendChild(el);
+  });
+  if(!profs.length)pg.innerHTML='<div class="empty">Nenhum profissional cadastrado.</div>';
+}
+
+/* ============================================================
+   BOOKING DRAWER — fluxo real
+   ============================================================ */
+let BK={serviceId:null,profId:null,date:null,time:null,pay:null,addons:[]};
+
+async function openBooking(serviceId){
+  const services=(await dbGetAll('services')).filter(s=>s.active);
+  const profs=(await dbGetAll('professionals')).filter(p=>p.active);
+  if(!services.length||!profs.length){toast('Cadastre serviços e profissionais no admin');return}
+  BK={serviceId:serviceId||services[0].id,profId:null,date:null,time:null,pay:null,addons:[]};
+  document.getElementById('bookingDrawer').classList.add('open');
+  renderDrawer();
+}
+function closeBooking(){
+  document.getElementById('bookingDrawer').classList.remove('open');
+}
+
+async function renderDrawer(){
+  const services=(await dbGetAll('services')).filter(s=>s.active);
+  const profs=(await dbGetAll('professionals')).filter(p=>p.active);
+  const svc=services.find(s=>s.id===BK.serviceId);
+  const panel=document.getElementById('drawerPanel');
+
+  let html=`<button class="drawer-close" onclick="closeBooking()">✕</button>`;
+  html+=`<div style="font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px">Reserva</div>`;
+  html+=`<h3>${esc(svc?.name||'')}</h3>`;
+  html+=`<div class="sub">${svc?.dur||0} min · ${fmtBRL(svc?.price)}</div>`;
+
+  // Etapa 1 — profissional
+  html+=`<div class="field"><label>Profissional</label><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">`;
+  profs.forEach(p=>{
+    const sel=p.id===BK.profId?'selected':'';
+    html+=`<div class="pay-method ${sel}" onclick="pickProf('${p.id}')" style="text-align:center;padding:10px 4px">
+      <img src="${esc(p.img||'')}" style="width:52px;height:52px;border-radius:999px;object-fit:cover;margin:0 auto 8px">
+      <strong style="font-size:13px">${esc(p.name.split(' ')[0])}</strong>
+    </div>`;
+  });
+  html+=`</div></div>`;
+
+  // Etapa 2 — data
+  const today=new Date();today.setHours(0,0,0,0);
+  html+=`<div class="field"><label>Data</label><div class="slot-grid" id="dateGrid">`;
+  for(let i=0;i<8;i++){
+    const d=new Date(today);d.setDate(d.getDate()+i);
+    const iso=d.toISOString().slice(0,10);
+    const sel=BK.date===iso?'selected':'';
+    const label=i===0?'HOJE':i===1?'AMANHÃ':d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit'}).toUpperCase();
+    html+=`<button class="slot ${sel}" onclick="pickDate('${iso}')">${label}</button>`;
+  }
+  html+=`</div></div>`;
+
+  // Etapa 3 — horário
+  if(BK.date&&BK.profId){
+    const slots=await availableSlots(BK.profId,BK.date,svc?.dur||60);
+    html+=`<div class="field"><label>Horário</label><div class="slot-grid">`;
+    if(!slots.length)html+=`<div style="color:var(--ink-3);font-size:12px">Nenhum horário nesta data.</div>`;
+    slots.forEach(t=>{
+      const sel=BK.time===t?'selected':'';
+      html+=`<button class="slot ${sel}" onclick="pickTime('${t}')">${t}</button>`;
+    });
+    html+=`</div></div>`;
+  }
+
+  // Etapa 4 — pagamento
+  if(BK.time){
+    html+=`<div class="field"><label>Forma de pagamento</label><div class="pay-methods">
+      <button class="pay-method ${BK.pay==='pix'?'selected':''}" onclick="pickPay('pix')"><strong>PIX</strong><span>Aprovação imediata</span></button>
+      <button class="pay-method ${BK.pay==='credit'?'selected':''}" onclick="pickPay('credit')"><strong>Crédito</strong><span>Parcelamento disponível</span></button>
+      <button class="pay-method ${BK.pay==='debit'?'selected':''}" onclick="pickPay('debit')"><strong>Débito</strong><span>À vista</span></button>
+      <button class="pay-method ${BK.pay==='cash'?'selected':''}" onclick="pickPay('cash')"><strong>No salão</strong><span>Pagamento presencial</span></button>
+    </div></div>`;
+
+    // Resumo
+    html+=`<div class="summary">
+      <div class="summary-row"><span>Experiência</span><span>${esc(svc?.name)}</span></div>
+      <div class="summary-row"><span>Profissional</span><span>${esc(profs.find(p=>p.id===BK.profId)?.name||'—')}</span></div>
+      <div class="summary-row"><span>Data</span><span>${fmtDate(BK.date)}</span></div>
+      <div class="summary-row"><span>Horário</span><span>${BK.time}</span></div>
+      <div class="summary-row"><span>Total</span><span>${fmtBRL(svc?.price)}</span></div>
+    </div>`;
+
+    html+=`<button class="btn btn-primary" onclick="confirmBooking()">Confirmar reserva</button>`;
+  }
+
+  panel.innerHTML=html;
+}
+
+async function pickProf(id){BK.profId=id;BK.time=null;renderDrawer()}
+async function pickDate(iso){BK.date=iso;BK.time=null;renderDrawer()}
+async function pickTime(t){BK.time=t;renderDrawer()}
+async function pickPay(p){BK.pay=p;renderDrawer()}
+
+/* Gera horários livres — 30 em 30 min de 09:00 a 19:00 */
+async function availableSlots(profId,dateISO,durMin){
+  const bookings=await dbGetAll('bookings');
+  const taken=bookings.filter(b=>b.profId===profId&&b.date===dateISO&&b.status!=='CANCELLED').map(b=>b.time);
+  const slots=[];
+  for(let h=9;h<19;h++){
+    for(const m of [0,30]){
+      const t=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      if(!taken.includes(t))slots.push(t);
+    }
+  }
+  return slots;
+}
+
+/* ============================================================
+   CONFIRMAÇÃO + PAGAMENTO SIMULADO
+   ============================================================ */
+async function confirmBooking(){
+  const services=await dbGetAll('services');
+  const svc=services.find(s=>s.id===BK.serviceId);
+  const profs=await dbGetAll('professionals');
+  const prof=profs.find(p=>p.id===BK.profId);
+  const panel=document.getElementById('drawerPanel');
+
+  const booking={
+    id:cuid(),
+    serviceId:BK.serviceId,
+    serviceName:svc.name,
+    profId:BK.profId,
+    profName:prof.name,
+    date:BK.date,
+    time:BK.time,
+    dur:svc.dur,
+    price:svc.price,
+    method:BK.pay,
+    status:BK.pay==='cash'?'CONFIRMED':'PENDING',
+    createdAt:new Date().toISOString(),
+  };
+  await dbPut('bookings',booking);
+
+  if(BK.pay==='pix'){
+    // Gera PIX simulado LOCAL (não chama Mercado Pago real — para isso precisa backend)
+    const pixCode='00020126580014BR.GOV.BCB.PIX0136'+cuid()+'5204000053039865802BR5925'+encodeURIComponent('MAISON')+'6009SAO PAULO62070503***6304'+Math.random().toString(16).slice(2,6).toUpperCase();
+    panel.innerHTML=`
+      <button class="drawer-close" onclick="closeBooking()">✕</button>
+      <div style="font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px">Pagamento PIX</div>
+      <h3>Aguardando<br>pagamento</h3>
+      <div class="sub">${fmtBRL(svc.price)} · Reserva ${booking.id.slice(0,8)}</div>
+      <div style="text-align:center;margin:20px 0">
+        <div class="qr-box">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}" alt="QR PIX">
+        </div>
+        <span class="status-pill">Aguardando pagamento</span>
+      </div>
+      <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">PIX copia e cola</div>
+      <div class="copy-paste">${pixCode}</div>
+      <button class="btn btn-ghost" onclick="copyText('${pixCode.replace(/'/g,"\\'")}')" style="margin-bottom:12px">Copiar código</button>
+      <button class="btn btn-primary" onclick="simulateApproval('${booking.id}')">Simular aprovação (webhook)</button>
+      <div style="font-size:11px;color:var(--ink-3);margin-top:18px;line-height:1.7">
+        ⚠️ <b>PIX simulado localmente.</b> Para cobrar de verdade, o backend NestJS precisa receber o <code>access_token</code> do Mercado Pago e criar o pagamento via API. Este HTML não faz chamadas reais por segurança — a chave nunca pode ir para o frontend.
+      </div>
+    `;
+  } else if(BK.pay==='credit'||BK.pay==='debit'){
+    panel.innerHTML=`
+      <button class="drawer-close" onclick="closeBooking()">✕</button>
+      <div style="font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px">${BK.pay==='credit'?'Crédito':'Débito'}</div>
+      <h3>Finalizar<br>pagamento</h3>
+      <div class="sub">${fmtBRL(svc.price)}</div>
+      <div class="field"><label>Número do cartão</label><input placeholder="4111 1111 1111 1111"></div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
+        <div class="field"><label>Validade</label><input placeholder="MM/AA"></div>
+        <div class="field"><label>CVV</label><input placeholder="123"></div>
+      </div>
+      ${BK.pay==='credit'?'<div class="field"><label>Parcelas</label><select><option>1x sem juros</option><option>2x sem juros</option><option>3x sem juros</option></select></div>':''}
+      <button class="btn btn-primary" onclick="simulateApproval('${booking.id}')">Pagar ${fmtBRL(svc.price)}</button>
+      <div style="font-size:11px;color:var(--ink-3);margin-top:18px;line-height:1.7">
+        ⚠️ <b>Formulário ilustrativo.</b> Em produção, o MercadoPago.js gera um <code>card_token</code> no navegador e o backend cobra. Nenhum dado sensível do cartão deve trafegar para o seu servidor.
+      </div>
+    `;
+  } else {
+    await finalizeBooking(booking.id,'CONFIRMED');
+  }
+}
+
+async function simulateApproval(bookingId){
+  await new Promise(r=>setTimeout(r,700));
+  await dbPut('payments',{id:cuid(),bookingId,method:'simulado',status:'APPROVED',amount:(await dbGet('bookings',bookingId))?.price||0,at:new Date().toISOString()});
+  await finalizeBooking(bookingId,'CONFIRMED');
+}
+
+async function finalizeBooking(bookingId,status){
+  const b=await dbGet('bookings',bookingId);
+  if(b){b.status=status;b.confirmedAt=new Date().toISOString();await dbPut('bookings',b)}
+  const panel=document.getElementById('drawerPanel');
+  panel.innerHTML=`
+    <button class="drawer-close" onclick="closeBooking()">✕</button>
+    <div style="font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:12px">Confirmado</div>
+    <h3>Tudo pronto.</h3>
+    <div class="sub">Reserva ${bookingId.slice(0,8)}</div>
+    <div class="summary">
+      <div class="summary-row"><span>Experiência</span><span>${esc(b.serviceName)}</span></div>
+      <div class="summary-row"><span>Profissional</span><span>${esc(b.profName)}</span></div>
+      <div class="summary-row"><span>Data</span><span>${fmtDate(b.date)}</span></div>
+      <div class="summary-row"><span>Horário</span><span>${b.time}</span></div>
+      <div class="summary-row"><span>Total</span><span>${fmtBRL(b.price)}</span></div>
+    </div>
+    <div style="background:rgba(122,155,110,.1);border:1px solid rgba(122,155,110,.3);padding:14px;border-radius:3px;color:#9bc48e;font-size:12px;margin-bottom:20px">
+      Sua reserva está confirmada. Enviaremos os detalhes por WhatsApp.
+    </div>
+    <button class="btn btn-ghost" onclick="closeBooking()">Fechar</button>
+  `;
+  toast('Reserva confirmada');
+}
+
+function copyText(t){
+  navigator.clipboard.writeText(t).then(()=>toast('Copiado'));
+}
+
+/* ============================================================
+   ADMIN — roteador e views
+   ============================================================ */
+const ADMIN_ROUTES=[
+  {sec:'Principal',items:[
+    {key:'dashboard',label:'Dashboard'},
+    {key:'agenda',label:'Agenda'},
+  ]},
+  {sec:'Catálogo',items:[
+    {key:'services',label:'Experiências'},
+    {key:'professionals',label:'Profissionais'},
+  ]},
+  {sec:'Operação',items:[
+    {key:'bookings',label:'Reservas'},
+    {key:'clients',label:'Clientes'},
+  ]},
+  {sec:'Site',items:[
+    {key:'cms',label:'Editor da Home'},
+    {key:'media',label:'Mídia'},
+    {key:'appearance',label:'Aparência'},
+  ]},
+  {sec:'Sistema',items:[
+    {key:'settings',label:'Configurações'},
+    {key:'security',label:'Segurança'},
+    {key:'audit',label:'Auditoria'},
+  ]},
+];
+
+function renderAdminNav(){
+  const nav=document.getElementById('adminNav');
+  nav.innerHTML='';
+  ADMIN_ROUTES.forEach(sec=>{
+    const h=document.createElement('div');
+    h.className='admin-nav-section';h.textContent=sec.sec;
+    nav.appendChild(h);
+    sec.items.forEach(it=>{
+      const b=document.createElement('button');
+      b.className='admin-nav-item';
+      b.dataset.route=it.key;
+      b.innerHTML=`<span class="dot"></span>${it.label}`;
+      b.onclick=()=>adminRoute(it.key);
+      nav.appendChild(b);
+    });
+  });
+}
+
+async function adminRoute(key){
+  document.querySelectorAll('.admin-nav-item').forEach(n=>n.classList.toggle('active',n.dataset.route===key));
+  const main=document.getElementById('adminMain');
+  main.innerHTML='<div class="empty">Carregando…</div>';
+  const routes={
+    dashboard:renderDashboard,
+    agenda:renderAgenda,
+    services:renderServicesAdmin,
+    professionals:renderProfsAdmin,
+    bookings:renderBookingsAdmin,
+    clients:renderClientsAdmin,
+    cms:renderCmsAdmin,
+    media:renderMediaAdmin,
+    appearance:renderAppearanceAdmin,
+    settings:renderSettingsAdmin,
+    security:renderSecurityAdmin,
+    audit:renderAuditAdmin,
+  };
+  await routes[key](main);
+}
+
+/* ============ DASHBOARD ============ */
+async function renderDashboard(main){
+  const bookings=await dbGetAll('bookings');
+  const payments=await dbGetAll('payments');
+  const services=await dbGetAll('services');
+  const clients=await dbGetAll('clients');
+
+  const paid=bookings.filter(b=>b.status==='CONFIRMED');
+  const revenue=paid.reduce((s,b)=>s+Number(b.price||0),0);
+  const avg=paid.length?revenue/paid.length:0;
+  const cancelled=bookings.filter(b=>b.status==='CANCELLED').length;
+
+  main.innerHTML=`
+    <div class="admin-head">
+      <div><h1>Dashboard</h1><div class="sub">Visão em tempo real da operação</div></div>
+      <div class="seg">
+        <button class="active">Hoje</button><button>7d</button><button>30d</button><button>Custom</button>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="label">Faturamento</div><div class="value">${fmtBRL(revenue)}</div><div class="delta">↑ confirmado</div></div>
+      <div class="kpi"><div class="label">Reservas</div><div class="value">${bookings.length}</div><div class="delta">${paid.length} confirmadas</div></div>
+      <div class="kpi"><div class="label">Ticket médio</div><div class="value">${fmtBRL(avg)}</div><div class="delta">—</div></div>
+      <div class="kpi"><div class="label">Cancelamentos</div><div class="value">${cancelled}</div><div class="delta ${cancelled?'down':''}">${cancelled?'atenção':'—'}</div></div>
+    </div>
+    <div class="panel">
+      <h3>Últimas reservas</h3>
+      <table class="admin-table">
+        <thead><tr><th>Cliente</th><th>Experiência</th><th>Profissional</th><th>Data</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody>
+          ${bookings.slice(-8).reverse().map(b=>`
+            <tr>
+              <td>${esc(b.customerName||'Cliente')}</td>
+              <td>${esc(b.serviceName)}</td>
+              <td>${esc(b.profName)}</td>
+              <td>${fmtDate(b.date)} ${b.time}</td>
+              <td>${fmtBRL(b.price)}</td>
+              <td>${statusTag(b.status)}</td>
+            </tr>
+          `).join('')||'<tr><td colspan="6" class="empty">Sem reservas ainda</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h3>Saúde da plataforma</h3>
+      <table class="admin-table">
+        <tbody>
+          <tr><td>Serviços ativos</td><td>${services.filter(s=>s.active).length} / ${services.length}</td></tr>
+          <tr><td>Pagamentos aprovados</td><td>${payments.filter(p=>p.status==='APPROVED').length}</td></tr>
+          <tr><td>Clientes cadastrados</td><td>${clients.length}</td></tr>
+          <tr><td>Mercado Pago</td><td>${await mpStatus()}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function statusTag(s){
+  const map={CONFIRMED:'ok',PENDING:'warn',CANCELLED:'danger',COMPLETED:'info',HOLD:'gold'};
+  return `<span class="tag ${map[s]||''}">${s}</span>`;
+}
+async function mpStatus(){
+  const s=await dbGet('settings','brand');
+  return s?.mpAccessToken?'<span class="tag ok">conectado</span>':'<span class="tag danger">não conectado</span>';
+}
+
+/* ============ AGENDA ============ */
+async function renderAgenda(main){
+  const bookings=await dbGetAll('bookings');
+  const today=new Date().toISOString().slice(0,10);
+  const todays=bookings.filter(b=>b.date===today).sort((a,b)=>a.time.localeCompare(b.time));
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Agenda</h1><div class="sub">${fmtDate(today)}</div></div>
+    <div class="seg"><button class="active">Dia</button><button>Semana</button><button>Mês</button></div></div>
+    <div class="panel">
+      <h3>Hoje — ${todays.length} reservas</h3>
+      <div class="agenda">
+        ${todays.length?todays.map(b=>`
+          <div class="time">${b.time}</div>
+          <div class="evt"><b>${esc(b.serviceName)}</b><small>${esc(b.profName)} · ${b.dur}min · ${fmtBRL(b.price)}</small></div>
+        `).join(''):'<div class="empty" style="grid-column:1/-1">Nada agendado para hoje</div>'}
+      </div>
+    </div>
+  `;
+}
+
+/* ============ SERVIÇOS (admin) ============ */
+async function renderServicesAdmin(main){
+  const services=await dbGetAll('services');
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Experiências</h1><div class="sub">${services.length} cadastradas</div></div>
+      <button class="btn-sm primary" onclick="editService()">+ Nova experiência</button></div>
+    <div class="panel">
+      <table class="admin-table">
+        <thead><tr><th>Nome</th><th>Categoria</th><th>Duração</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          ${services.map(s=>`
+            <tr>
+              <td><b>${esc(s.name)}</b><br><small style="color:#52525e">${esc(s.desc||'')}</small></td>
+              <td>${esc(s.cat)}</td>
+              <td>${s.dur} min</td>
+              <td>${fmtBRL(s.price)}</td>
+              <td>${s.active?'<span class="tag ok">ativo</span>':'<span class="tag danger">inativo</span>'}</td>
+              <td style="text-align:right">
+                <button class="btn-sm" onclick="editService('${s.id}')">Editar</button>
+                <button class="btn-sm danger" onclick="delService('${s.id}')">Excluir</button>
+              </td>
+            </tr>
+          `).join('')||'<tr><td colspan="6" class="empty">Nenhuma experiência</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function editService(id){
+  const s=id?await dbGet('services',id):{name:'',cat:'Cabelo',price:0,dur:60,img:'',desc:'',active:true};
+  const main=document.getElementById('adminMain');
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>${id?'Editar':'Nova'} experiência</h1>
+      <div class="sub">Preencha os campos e salve</div></div>
+      <button class="btn-sm" onclick="adminRoute('services')">← Voltar</button></div>
+    <div class="panel">
+      <div class="admin-form two">
+        <div class="field full"><label>Nome</label><input id="sName" value="${esc(s.name)}"></div>
+        <div class="field"><label>Categoria</label>
+          <select id="sCat">
+            ${['Cabelo','Cor','Estética','Finalização','Unhas','Maquiagem'].map(c=>`<option ${c===s.cat?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Duração (min)</label><input id="sDur" type="number" value="${s.dur}"></div>
+        <div class="field"><label>Preço (R$)</label><input id="sPrice" type="number" step="0.01" value="${s.price}"></div>
+        <div class="field"><label>Status</label>
+          <select id="sActive"><option value="1" ${s.active?'selected':''}>Ativo</option><option value="0" ${!s.active?'selected':''}>Inativo</option></select>
+        </div>
+        <div class="field full"><label>Descrição</label><textarea id="sDesc" rows="3">${esc(s.desc||'')}</textarea></div>
+        <div class="field full"><label>Imagem</label>
+          <div class="upload-box" onclick="document.getElementById('sImgFile').click()">
+            <input type="file" id="sImgFile" accept="image/*" onchange="handleServiceImage(this)">
+            <div>📁 Carregar da galeria / computador</div>
+            <div style="font-size:10.5px;margin-top:6px;color:#3e3e48">JPG · PNG · WEBP</div>
+          </div>
+          <div class="url-row">
+            <input id="sImgUrl" placeholder="…ou cole a URL da imagem" value="${s.img&&!s.img.startsWith('data:')?esc(s.img):''}">
+            <button class="btn-sm" onclick="useServiceUrl()">Usar URL</button>
+          </div>
+          <div id="sImgPreview">${s.img?`<div class="upload-preview"><img src="${esc(s.img)}"><div class="info">${s.img.startsWith('data:')?'Upload local':'Imagem externa'}</div><button onclick="clearServiceImage()">Remover</button></div>`:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:24px">
+        <button class="btn-sm primary" onclick="saveService('${id||''}')">Salvar</button>
+        <button class="btn-sm" onclick="adminRoute('services')">Cancelar</button>
+      </div>
+    </div>
+  `;
+  window._editingService=id?s:{...s,id:null};
+}
+
+function handleServiceImage(input){
+  const f=input.files[0];if(!f)return;
+  if(!['image/jpeg','image/png','image/webp'].includes(f.type)){toast('Formato inválido');return}
+  if(f.size>5*1024*1024){toast('Máx 5MB');return}
+  const r=new FileReader();
+  r.onload=()=>{
+    window._editingService.img=r.result;
+    document.getElementById('sImgPreview').innerHTML=`<div class="upload-preview"><img src="${r.result}"><div class="info">${f.name} · ${(f.size/1024).toFixed(0)}KB</div><button onclick="clearServiceImage()">Remover</button></div>`;
+    dbPut('media',{id:cuid(),name:f.name,url:r.result,size:f.size,folder:'services',at:new Date().toISOString()});
+  };
+  r.readAsDataURL(f);
+}
+function useServiceUrl(){
+  const u=document.getElementById('sImgUrl').value.trim();
+  if(!u){toast('Cole uma URL');return}
+  window._editingService.img=u;
+  document.getElementById('sImgPreview').innerHTML=`<div class="upload-preview"><img src="${esc(u)}"><div class="info">${esc(u)}</div><button onclick="clearServiceImage()">Remover</button></div>`;
+}
+function clearServiceImage(){
+  window._editingService.img='';
+  document.getElementById('sImgPreview').innerHTML='';
+}
+async function saveService(id){
+  const s=window._editingService||{};
+  const payload={
+    id:id||cuid(),
+    name:document.getElementById('sName').value.trim(),
+    cat:document.getElementById('sCat').value,
+    dur:Number(document.getElementById('sDur').value),
+    price:Number(document.getElementById('sPrice').value),
+    active:document.getElementById('sActive').value==='1',
+    desc:document.getElementById('sDesc').value.trim(),
+    img:s.img||'',
+    createdAt:s.createdAt||new Date().toISOString(),
+  };
+  if(!payload.name){toast('Informe o nome');return}
+  await dbPut('services',payload);
+  const sess=getSession();
+  await audit(sess.userId,id?'SERVICE_UPDATE':'SERVICE_CREATE','Service',payload.id,{});
+  toast('Salvo');
+  adminRoute('services');
+}
+async function delService(id){
+  if(!confirm('Excluir esta experiência?'))return;
+  await dbDel('services',id);
+  const sess=getSession();await audit(sess.userId,'SERVICE_DELETE','Service',id,{});
+  toast('Excluída');
+  adminRoute('services');
+}
+
+/* ============ PROFISSIONAIS (admin) ============ */
+async function renderProfsAdmin(main){
+  const profs=await dbGetAll('professionals');
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Profissionais</h1><div class="sub">${profs.length} cadastrados</div></div>
+      <button class="btn-sm primary" onclick="editProf()">+ Novo profissional</button></div>
+    <div class="panel">
+      <table class="admin-table">
+        <thead><tr><th>Nome</th><th>Função</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          ${profs.map(p=>`
+            <tr>
+              <td style="display:flex;align-items:center;gap:12px">
+                <img src="${esc(p.img||'')}" style="width:36px;height:36px;border-radius:999px;object-fit:cover">
+                <b>${esc(p.name)}</b>
+              </td>
+              <td>${esc(p.role||'')}</td>
+              <td>${p.active?'<span class="tag ok">ativo</span>':'<span class="tag danger">inativo</span>'}</td>
+              <td style="text-align:right">
+                <button class="btn-sm" onclick="editProf('${p.id}')">Editar</button>
+                <button class="btn-sm danger" onclick="delProf('${p.id}')">Excluir</button>
+              </td>
+            </tr>
+          `).join('')||'<tr><td colspan="4" class="empty">Nenhum profissional</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+async function editProf(id){
+  const p=id?await dbGet('professionals',id):{name:'',role:'',bio:'',img:'',active:true};
+  const main=document.getElementById('adminMain');
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>${id?'Editar':'Novo'} profissional</h1></div>
+      <button class="btn-sm" onclick="adminRoute('professionals')">← Voltar</button></div>
+    <div class="panel">
+      <div class="admin-form two">
+        <div class="field full"><label>Nome</label><input id="pName" value="${esc(p.name)}"></div>
+        <div class="field"><label>Função</label><input id="pRole" value="${esc(p.role||'')}"></div>
+        <div class="field"><label>Status</label>
+          <select id="pActive"><option value="1" ${p.active?'selected':''}>Ativo</option><option value="0" ${!p.active?'selected':''}>Inativo</option></select>
+        </div>
+        <div class="field full"><label>Bio</label><textarea id="pBio" rows="2">${esc(p.bio||'')}</textarea></div>
+        <div class="field full"><label>Foto</label>
+          <div class="upload-box" onclick="document.getElementById('pImgFile').click()">
+            <input type="file" id="pImgFile" accept="image/*" onchange="handleProfImage(this)">
+            <div>📁 Carregar da galeria / computador</div>
+          </div>
+          <div class="url-row">
+            <input id="pImgUrl" placeholder="…ou cole a URL" value="${p.img&&!p.img.startsWith('data:')?esc(p.img):''}">
+            <button class="btn-sm" onclick="useProfUrl()">Usar URL</button>
+          </div>
+          <div id="pImgPreview">${p.img?`<div class="upload-preview"><img src="${esc(p.img)}"><button onclick="clearProfImage()">Remover</button></div>`:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:24px">
+        <button class="btn-sm primary" onclick="saveProf('${id||''}')">Salvar</button>
+      </div>
+    </div>
+  `;
+  window._editingProf=id?p:{...p,id:null};
+}
+function handleProfImage(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    window._editingProf.img=r.result;
+    document.getElementById('pImgPreview').innerHTML=`<div class="upload-preview"><img src="${r.result}"><div class="info">${f.name}</div><button onclick="clearProfImage()">Remover</button></div>`;
+    dbPut('media',{id:cuid(),name:f.name,url:r.result,size:f.size,folder:'professionals',at:new Date().toISOString()});
+  };
+  r.readAsDataURL(f);
+}
+function useProfUrl(){
+  const u=document.getElementById('pImgUrl').value.trim();
+  if(!u)return;
+  window._editingProf.img=u;
+  document.getElementById('pImgPreview').innerHTML=`<div class="upload-preview"><img src="${esc(u)}"><div class="info">${esc(u)}</div><button onclick="clearProfImage()">Remover</button></div>`;
+}
+function clearProfImage(){window._editingProf.img='';document.getElementById('pImgPreview').innerHTML=''}
+async function saveProf(id){
+  const p=window._editingProf||{};
+  const payload={
+    id:id||cuid(),
+    name:document.getElementById('pName').value.trim(),
+    role:document.getElementById('pRole').value.trim(),
+    bio:document.getElementById('pBio').value.trim(),
+    active:document.getElementById('pActive').value==='1',
+    img:p.img||'',
+    createdAt:p.createdAt||new Date().toISOString(),
+  };
+  if(!payload.name){toast('Informe o nome');return}
+  await dbPut('professionals',payload);
+  const sess=getSession();await audit(sess.userId,id?'PROF_UPDATE':'PROF_CREATE','Professional',payload.id,{});
+  toast('Salvo');
+  adminRoute('professionals');
+}
+async function delProf(id){
+  if(!confirm('Excluir?'))return;
+  await dbDel('professionals',id);
+  const sess=getSession();await audit(sess.userId,'PROF_DELETE','Professional',id,{});
+  toast('Excluído');adminRoute('professionals');
+}
+
+/* ============ RESERVAS (admin) ============ */
+async function renderBookingsAdmin(main){
+  const bookings=await dbGetAll('bookings');
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Reservas</h1><div class="sub">${bookings.length} no total</div></div></div>
+    <div class="panel">
+      <table class="admin-table">
+        <thead><tr><th>Data</th><th>Hora</th><th>Experiência</th><th>Profissional</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          ${bookings.slice().reverse().map(b=>`
+            <tr>
+              <td>${fmtDate(b.date)}</td>
+              <td>${b.time}</td>
+              <td>${esc(b.serviceName)}</td>
+              <td>${esc(b.profName)}</td>
+              <td>${fmtBRL(b.price)}</td>
+              <td>${statusTag(b.status)}</td>
+              <td style="text-align:right">
+                <button class="btn-sm" onclick="cancelBooking('${b.id}')">Cancelar</button>
+                <button class="btn-sm danger" onclick="delBooking('${b.id}')">Excluir</button>
+              </td>
+            </tr>
+          `).join('')||'<tr><td colspan="7" class="empty">Sem reservas</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+async function cancelBooking(id){
+  const b=await dbGet('bookings',id);b.status='CANCELLED';await dbPut('bookings',b);
+  const sess=getSession();await audit(sess.userId,'BOOKING_CANCEL','Booking',id,{});
+  toast('Cancelada');adminRoute('bookings');
+}
+async function delBooking(id){
+  if(!confirm('Excluir registro?'))return;
+  await dbDel('bookings',id);
+  const sess=getSession();await audit(sess.userId,'BOOKING_DELETE','Booking',id,{});
+  adminRoute('bookings');
+}
+
+/* ============ CLIENTES ============ */
+async function renderClientsAdmin(main){
+  const clients=await dbGetAll('clients');
+  const bookings=await dbGetAll('bookings');
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Clientes</h1><div class="sub">${clients.length} na base</div></div></div>
+    <div class="panel">
+      <table class="admin-table">
+        <thead><tr><th>Nome</th><th>Telefone</th><th>Reservas</th><th>Total gasto</th></tr></thead>
+        <tbody>
+          ${clients.map(c=>{
+            const bs=bookings.filter(b=>b.customerId===c.id);
+            const total=bs.reduce((s,b)=>s+Number(b.price||0),0);
+            return `<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.phone||'—')}</td><td>${bs.length}</td><td>${fmtBRL(total)}</td></tr>`;
+          }).join('')||'<tr><td colspan="4" class="empty">Ainda sem clientes cadastrados</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ============ CMS ============ */
+async function renderCmsAdmin(main){
+  const sections=(await dbGetAll('cms')).sort((a,b)=>a.order-b.order);
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Editor da Home</h1><div class="sub">Arraste, ative, edite e publique</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" onclick="toast('Rascunho salvo localmente')">Salvar rascunho</button>
+        <button class="btn-sm primary" onclick="publishCms()">Publicar alterações</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Seções da Home</h3>
+      <div id="cmsList">
+        ${sections.map(s=>`
+          <div class="cms-section" draggable="true" data-id="${s.id}">
+            <span class="handle">⋮⋮</span>
+            <div class="name">${esc(s.label)}<small>key: ${esc(s.key)}</small></div>
+            <div class="toggles">
+              <div class="switch ${s.enabled?'on':''}" onclick="toggleCms('${s.id}')"></div>
+              <button class="btn-sm" onclick="adminRoute('settings')">Editar</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="color:#52525e;font-size:11.5px;margin-top:16px">
+        ⓘ Para editar textos (hero, manifesto, footer), vá em <b>Configurações</b>.
+      </div>
+    </div>
+  `;
+  enableDrag();
+}
+function enableDrag(){
+  const list=document.getElementById('cmsList');
+  if(!list)return;
+  let dragEl=null;
+  list.querySelectorAll('.cms-section').forEach(el=>{
+    el.addEventListener('dragstart',()=>{dragEl=el;el.classList.add('dragging')});
+    el.addEventListener('dragend',()=>{el.classList.remove('dragging');saveCmsOrder()});
+    el.addEventListener('dragover',e=>{
+      e.preventDefault();
+      const after=[...list.querySelectorAll('.cms-section:not(.dragging)')].reduce((closest,child)=>{
+        const box=child.getBoundingClientRect();
+        const offset=e.clientY-box.top-box.height/2;
+        return offset<0&&offset>closest.offset?{offset,el:child}:closest;
+      },{offset:-Infinity,el:null}).el;
+      if(after)list.insertBefore(dragEl,after);
+      else list.appendChild(dragEl);
+    });
+  });
+}
+async function saveCmsOrder(){
+  const list=document.getElementById('cmsList');
+  const ids=[...list.querySelectorAll('.cms-section')].map(el=>el.dataset.id);
+  for(let i=0;i<ids.length;i++){
+    const s=await dbGet('cms',ids[i]);
+    if(s){s.order=i;await dbPut('cms',s)}
+  }
+  toast('Ordem salva');
+}
+async function toggleCms(id){
+  const s=await dbGet('cms',id);
+  s.enabled=!s.enabled;
+  await dbPut('cms',s);
+  renderCmsAdmin(document.getElementById('adminMain'));
+}
+async function publishCms(){
+  const sess=getSession();
+  await audit(sess.userId,'CMS_PUBLISH','Cms','home',{});
+  toast('Publicado — app do cliente atualizado');
+  renderClient();
+}
+
+/* ============ MÍDIA ============ */
+async function renderMediaAdmin(main){
+  const media=(await dbGetAll('media')).reverse();
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Biblioteca de mídia</h1><div class="sub">${media.length} arquivos</div></div>
+      <div class="upload-box" style="width:220px;padding:12px" onclick="document.getElementById('mediaFile').click()">
+        <input type="file" id="mediaFile" accept="image/*" multiple onchange="uploadMedia(this)">
+        <div style="font-size:12px">📁 Carregar imagem(ns)</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="url-row" style="margin-bottom:20px">
+        <input id="mediaUrl" placeholder="Cole a URL da imagem e clique em Adicionar">
+        <button class="btn-sm primary" onclick="addMediaUrl()">Adicionar URL</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px">
+        ${media.map(m=>`
+          <div style="border:1px solid #1e1e24;border-radius:3px;overflow:hidden;background:#0a0a0c">
+            <img src="${esc(m.url)}" style="width:100%;aspect-ratio:1;object-fit:cover">
+            <div style="padding:8px;font-size:10.5px;color:#6b6b78;word-break:break-all">
+              ${esc(m.name||m.url.slice(-30))}
+              <div style="margin-top:6px;display:flex;gap:6px">
+                <button class="btn-sm" style="padding:4px 8px;font-size:10px" onclick="copyText('${esc(m.url).replace(/'/g,"\\'")}')">Copiar URL</button>
+                <button class="btn-sm danger" style="padding:4px 8px;font-size:10px" onclick="delMedia('${m.id}')">Excluir</button>
+              </div>
+            </div>
+          </div>
+        `).join('')||'<div class="empty">Biblioteca vazia</div>'}
+      </div>
+    </div>
+  `;
+}
+function uploadMedia(input){
+  [...input.files].forEach(f=>{
+    if(!f.type.startsWith('image/'))return;
+    const r=new FileReader();
+    r.onload=async()=>{
+      await dbPut('media',{id:cuid(),name:f.name,url:r.result,size:f.size,folder:'uploads',at:new Date().toISOString()});
+      renderMediaAdmin(document.getElementById('adminMain'));
+      toast('Imagem carregada');
+    };
+    r.readAsDataURL(f);
+  });
+}
+async function addMediaUrl(){
+  const u=document.getElementById('mediaUrl').value.trim();
+  if(!u||!/^https?:\/\//.test(u)){toast('URL inválida');return}
+  await dbPut('media',{id:cuid(),name:u.split('/').pop(),url:u,folder:'externo',at:new Date().toISOString()});
+  renderMediaAdmin(document.getElementById('adminMain'));
+  toast('Adicionada');
+}
+async function delMedia(id){
+  await dbDel('media',id);
+  renderMediaAdmin(document.getElementById('adminMain'));
+}
+
+/* ============ APARÊNCIA ============ */
+async function renderAppearanceAdmin(main){
+  const S=await dbGet('settings','brand');
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Aparência</h1><div class="sub">Identidade visual do app do cliente</div></div>
+      <button class="btn-sm primary" onclick="saveAppearance()">Publicar</button></div>
+    <div class="panel">
+      <div class="admin-form two">
+        <div class="field"><label>Nome do salão</label><input id="apName" value="${esc(S.salonName||'')}"></div>
+        <div class="field"><label>Cor de destaque (accent)</label><input id="apAccent" type="color" value="${S.accent||'#c9a961'}" style="height:44px;padding:4px"></div>
+        <div class="field"><label>Cor de fundo</label><input id="apBg" type="color" value="${S.bg||'#0a0a0a'}" style="height:44px;padding:4px"></div>
+        <div class="field"><label>Cor do texto</label><input id="apInk" type="color" value="${S.ink||'#f4f1ea'}" style="height:44px;padding:4px"></div>
+        <div class="field full"><label>Endereço</label><input id="apAddr" value="${esc(S.address||'')}"></div>
+        <div class="field full"><label>Telefone / WhatsApp</label><input id="apPhone" value="${esc(S.phone||'')}"></div>
+      </div>
+      <div style="margin-top:16px;color:#52525e;font-size:11.5px">A pré-visualização é aplicada ao app do cliente após publicar.</div>
+    </div>
+  `;
+}
+async function saveAppearance(){
+  const S=await dbGet('settings','brand');
+  S.salonName=document.getElementById('apName').value;
+  S.accent=document.getElementById('apAccent').value;
+  S.bg=document.getElementById('apBg').value;
+  S.ink=document.getElementById('apInk').value;
+  S.address=document.getElementById('apAddr').value;
+  S.phone=document.getElementById('apPhone').value;
+  await dbPut('settings',S);
+  const sess=getSession();await audit(sess.userId,'APPEARANCE_UPDATE','Settings','brand',{});
+  toast('Aparência publicada');
+  renderClient();
+}
+
+/* ============ CONFIGURAÇÕES (inclui Mercado Pago) ============ */
+async function renderSettingsAdmin(main){
+  const S=await dbGet('settings','brand');
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Configurações</h1><div class="sub">Conteúdo + integrações</div></div>
+      <button class="btn-sm primary" onclick="saveSettings()">Salvar tudo</button></div>
+
+    <div class="panel">
+      <h3>Home — Hero</h3>
+      <div class="admin-form two">
+        <div class="field full"><label>Eyebrow</label><input id="cfgHeroEyebrow" value="${esc(S.heroEyebrow||'')}"></div>
+        <div class="field full"><label>Título (aceita HTML simples &lt;br&gt;&lt;em&gt;)</label><input id="cfgHeroTitle" value="${esc(S.heroTitle||'')}"></div>
+        <div class="field full"><label>Subtítulo</label><textarea id="cfgHeroSub" rows="2">${esc(S.heroSub||'')}</textarea></div>
+        <div class="field full"><label>Imagem do Hero</label>
+          <div class="upload-box" onclick="document.getElementById('cfgHeroFile').click()">
+            <input type="file" id="cfgHeroFile" accept="image/*" onchange="heroFile(this)">
+            <div>📁 Carregar da galeria</div>
+          </div>
+          <div class="url-row">
+            <input id="cfgHeroUrl" placeholder="…ou cole a URL" value="${S.heroImage&&!S.heroImage.startsWith('data:')?esc(S.heroImage):''}">
+            <button class="btn-sm" onclick="heroUrl()">Usar URL</button>
+          </div>
+          <div id="cfgHeroPreview">${S.heroImage?`<div class="upload-preview"><img src="${esc(S.heroImage)}"></div>`:''}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Home — Manifesto</h3>
+      <div class="admin-form two">
+        <div class="field full"><label>Título</label><input id="cfgManTitle" value="${esc(S.manifestoTitle||'')}"></div>
+        <div class="field full"><label>Texto</label><textarea id="cfgManText" rows="3">${esc(S.manifestoText||'')}</textarea></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Mercado Pago</h3>
+      <div class="admin-form two">
+        <div class="field"><label>Public Key</label><input id="cfgMpPub" value="${esc(S.mpPublicKey||'')}" placeholder="APP_USR-..."></div>
+        <div class="field"><label>Access Token</label><input id="cfgMpTok" type="password" value="${esc(S.mpAccessToken||'')}" placeholder="APP_USR-..."></div>
+        <div class="field"><label>Ambiente</label>
+          <select id="cfgMpEnv">
+            <option value="sandbox" ${S.mpEnv==='sandbox'?'selected':''}>Sandbox</option>
+            <option value="production" ${S.mpEnv==='production'?'selected':''}>Produção</option>
+          </select>
+        </div>
+        <div class="field"><label>Status</label>
+          <div style="padding:10px 0">${S.mpAccessToken?'<span class="tag ok">conectado</span>':'<span class="tag danger">não conectado</span>'}</div>
+        </div>
+        <div class="field full">
+          <button class="btn-sm" onclick="testMp()">Testar conexão</button>
+          <div style="font-size:11px;color:#52525e;margin-top:10px;line-height:1.6">
+            ⚠️ Neste HTML single-file, as credenciais ficam <b>só no seu navegador</b> (IndexedDB). Em produção, o <b>Access Token</b> deve viver no backend, criptografado — ele nunca pode ir para o frontend.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Formas de pagamento</h3>
+      <div class="admin-form two">
+        <div class="field"><label>PIX</label><div class="switch ${S.payPix?'on':''}" id="swPix" onclick="this.classList.toggle('on')"></div></div>
+        <div class="field"><label>Crédito</label><div class="switch ${S.payCredit?'on':''}" id="swCredit" onclick="this.classList.toggle('on')"></div></div>
+        <div class="field"><label>Débito</label><div class="switch ${S.payDebit?'on':''}" id="swDebit" onclick="this.classList.toggle('on')"></div></div>
+        <div class="field"><label>No salão</label><div class="switch ${S.payCash?'on':''}" id="swCash" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+  `;
+}
+let _heroImage=null;
+function heroFile(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    _heroImage=r.result;
+    document.getElementById('cfgHeroPreview').innerHTML=`<div class="upload-preview"><img src="${r.result}"><div class="info">${f.name}</div></div>`;
+    dbPut('media',{id:cuid(),name:f.name,url:r.result,size:f.size,folder:'hero',at:new Date().toISOString()});
+  };
+  r.readAsDataURL(f);
+}
+function heroUrl(){
+  const u=document.getElementById('cfgHeroUrl').value.trim();
+  if(!u)return;
+  _heroImage=u;
+  document.getElementById('cfgHeroPreview').innerHTML=`<div class="upload-preview"><img src="${esc(u)}"><div class="info">${esc(u)}</div></div>`;
+}
+async function saveSettings(){
+  const S=await dbGet('settings','brand');
+  S.heroEyebrow=document.getElementById('cfgHeroEyebrow').value;
+  S.heroTitle=document.getElementById('cfgHeroTitle').value;
+  S.heroSub=document.getElementById('cfgHeroSub').value;
+  if(_heroImage)S.heroImage=_heroImage;
+  S.manifestoTitle=document.getElementById('cfgManTitle').value;
+  S.manifestoText=document.getElementById('cfgManText').value;
+  S.mpPublicKey=document.getElementById('cfgMpPub').value;
+  S.mpAccessToken=document.getElementById('cfgMpTok').value;
+  S.mpEnv=document.getElementById('cfgMpEnv').value;
+  S.payPix=document.getElementById('swPix').classList.contains('on');
+  S.payCredit=document.getElementById('swCredit').classList.contains('on');
+  S.payDebit=document.getElementById('swDebit').classList.contains('on');
+  S.payCash=document.getElementById('swCash').classList.contains('on');
+  await dbPut('settings',S);
+  const sess=getSession();await audit(sess.userId,'SETTINGS_UPDATE','Settings','brand',{});
+  toast('Configurações salvas');
+  renderClient();
+}
+function testMp(){
+  const tok=document.getElementById('cfgMpTok').value;
+  if(!tok){toast('Informe o Access Token');return}
+  toast('Token registrado (validação real exige backend)');
+}
+
+/* ============ SEGURANÇA ============ */
+async function renderSecurityAdmin(main){
+  const s=getSession();
+  const user=(await dbGetAll('users')).find(u=>u.id===s.userId);
+  const sessions=(await dbGetAll('sessions')).filter(x=>x.userId===s.userId);
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Segurança da conta</h1><div class="sub">${esc(user.email)}</div></div></div>
+    <div class="panel">
+      <h3>Alterar senha</h3>
+      <div class="admin-form">
+        <div class="field"><label>Senha atual</label><input id="secOld" type="password"></div>
+        <div class="field"><label>Nova senha</label><input id="secNew" type="password"></div>
+        <div class="field"><label>Confirmar nova senha</label><input id="secNew2" type="password"></div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="btn-sm primary" onclick="changePass()">Alterar senha</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Sessões ativas <span class="tag info">${sessions.filter(x=>!x.revoked).length}</span></h3>
+      <table class="admin-table">
+        <thead><tr><th>Início</th><th>Encerrada</th><th>Status</th></tr></thead>
+        <tbody>
+          ${sessions.map(x=>`<tr><td>${fmtDateTime(x.startedAt)}</td><td>${x.endedAt?fmtDateTime(x.endedAt):'—'}</td><td>${x.revoked?'<span class="tag danger">encerrada</span>':'<span class="tag ok">ativa</span>'}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:16px"><button class="btn-sm danger" onclick="doLogoutAll()">Encerrar todas as sessões</button></div>
+    </div>
+  `;
+}
+async function changePass(){
+  const s=getSession();
+  const user=(await dbGetAll('users')).find(u=>u.id===s.userId);
+  const oldV=document.getElementById('secOld').value;
+  const nw=document.getElementById('secNew').value;
+  const nw2=document.getElementById('secNew2').value;
+  if(nw.length<8){toast('Nova senha: mínimo 8 caracteres');return}
+  if(nw!==nw2){toast('Confirmação não bate');return}
+  const ok=await verifyPassword(oldV,user.passwordHash,user.salt);
+  if(!ok){toast('Senha atual incorreta');return}
+  const {hash,salt}=await hashPassword(nw);
+  user.passwordHash=hash;user.salt=salt;
+  await dbPut('users',user);
+  await audit(s.userId,'PASSWORD_CHANGED','User',user.id,{});
+  document.getElementById('secOld').value='';
+  document.getElementById('secNew').value='';
+  document.getElementById('secNew2').value='';
+  toast('Senha alterada');
+}
+
+/* ============ AUDITORIA ============ */
+async function renderAuditAdmin(main){
+  const logs=(await dbGetAll('audit')).sort((a,b)=>b.at.localeCompare(a.at));
+  main.innerHTML=`
+    <div class="admin-head"><div><h1>Auditoria</h1><div class="sub">${logs.length} eventos registrados</div></div></div>
+    <div class="panel">
+      <table class="admin-table">
+        <thead><tr><th>Quando</th><th>Ação</th><th>Recurso</th><th>ID</th></tr></thead>
+        <tbody>
+          ${logs.slice(0,100).map(l=>`
+            <tr>
+              <td>${fmtDateTime(l.at)}</td>
+              <td><span class="tag gold">${esc(l.action)}</span></td>
+              <td>${esc(l.resource)}</td>
+              <td><small style="color:#52525e">${esc((l.resourceId||'').slice(0,12))}</code></small></td>
+            </tr>
+          `).join('')||'<tr><td colspan="4" class="empty">Nenhum evento</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ============================================================
+   NAV — scroll shrink
+   ============================================================ */
+window.addEventListener('scroll',()=>{
+  const nav=document.getElementById('appNav');
+  if(!nav)return;
+  nav.classList.toggle('scrolled',window.scrollY>40);
+});
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+(async function boot(){
+  await openDB();
+  await seed();
+  const s=getSession();
+  if(s){showAdmin()}
+  else{showClient()}
+})();
+</script>
+</body>
+</html>
